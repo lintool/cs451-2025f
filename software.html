@@ -68,6 +68,72 @@
 
 <div>
 
+<h3>Spark and PySpark</h3>
+
+<p>Spark is the core software used in this course.
+More specifically, we'll be extensively using PySpark, which provide Python bindings to Spark.
+(Py)Spark can be invoked from the command line, but the assignments are written as <a href="https://jupyter.org/">Jupyter notebooks</a>.</p>
+
+<p>Although (Py)Spark is intended to run on a cluster, in this course you'll be running the complete software stack locally.
+The assignments are designed so that they can be completed on any reasonably modern laptop.
+The datasets we'll be giving you are no more than a small number of gigabytes, and processing time is not intended to take more than a couple of minutes at most.
+If you encounter any divergence from this, it's likely that you're not doing something right...</p>
+
+<p>We will strive to be helpful, but it is our expectation that you will be able to install and configure all software necessary for this course on your own.
+We provide basic installation instructions here, but the course staff cannot provide detailed technical support and individual hand-holding for everyone, due to the number of students and the idiosyncrasies of individual systems.</p>
+
+<h3>Conda</h3>
+
+<p>Conda is recommended for managing your environment.
+Here's how you might get started by creating an environment for this course:</p>
+
+<pre>
+conda create -n cs451 python=3.10 -y
+conda activate cs451
+</pre>
+
+<p>Once you've activated the environment, install the following packages:</p>
+
+<pre>
+conda install -c conda-forge openjdk=21 maven -y
+pip install findspark
+pip install numpy
+pip install jupyterlab
+</pre>
+
+<p>We'll be using Python 3.10 and Java 21.
+As of September 2025, <code>jupyterlab</code> is at version 4.4.6.</p>
+
+<p>Next, grab the Spark tarball from <a href="https://spark.apache.org/downloads.html">here</a>.
+You want v4.0.0, "Pre-built for Apache Hadoop 3.4 and later".
+Note that Spark 4 is pre-built with Scala 2.13.</p>
+
+<p>Unpack the tarball somewhere convenient.
+Set your <code>SPARK_HOME</code> environment variable to point to the location where you've unpacked the tarball.
+Add the <code>bin/</code> sub-directory to your path.
+Something like this:
+</p>
+
+<pre>
+export SPARK_HOME="/path/to/spark-4.0.0-bin-hadoop3"
+export PATH="$PATH:$SPARK_HOME/bin"
+</pre>
+
+<p>Once this is all done, you should be able to launch JupyterLab in a shell (terminal), as follows:</p>
+
+<pre>
+jupyter lab
+</pre>
+
+<p>The above instructions provide a starting point.
+There are many variations, especially for different operating systems, so YMMV.</p>
+
+<h3>Different Entry Points</h3>
+
+<p>While the assignments are to be turned in via Jupyter notebooks, it is not necessarily the case that they are the most convenient development environment.
+Different software capabilities can be accessed via JupyterLab, from a shell (terminal), from VS Code, etc.
+You might want to experiment with difference approaches for different usage scenarios.
+Remember, though, to follow the submission instructions for each assignment.</p>
 
 </div>
 
