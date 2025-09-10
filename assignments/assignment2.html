@@ -77,13 +77,129 @@
     </ul>
   </div>
 
-<h3>Assignment 2 <small>due 10am September 25</small></h3>
+<h3>Assignment 2: ETL <small>due 10am September 25</small></h3>
 
 <p>‼️ This assignment isn't "ready" until the release date specified in the <a href="../syllabus.html">course syllabus</a>.
 Anything (questions, grading scheme, etc.) might arbitrarily change before the release date.
 <i>Start this assignment before the release date at your own risk.</i>
 After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p>
 
+<p>This assignment covers the entire ETL process, from the operational database to the analytical database.
+We hand you a PostgreSQL dump of the operational database of a hypothetical e-commerce site, built on <a href="https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store">this dataset</a>.
+At a high level, we ask you to:</p>
+
+<ul>
+
+<li>Restore the PostgreSQL dump into a local instance of PostgreSQL so that you can issue queries against a live operational database.</li>
+<li>Export the tables from the operational database into CSV files.</li>
+<li>Use Spark to transform the extracted data into relations conforming to a star schema that would be suitable for a data warehouse.</li>
+
+</ul>
+
+<p>Specifically, in the data warehouse, you will build:</p>
+
+<ul>
+
+<li>A number of dimension tables.</li>
+<li>A central fact table linked to the dimension tables.</li>
+
+</ul>
+
+<h4 style="padding-top: 10px">Install PostgreSQL</h4>
+
+<p>Your first step is to install PostgreSQL on your machine.
+There are many ways to accomplish this, but you are expected to figure out how to do so yourself.
+Once you have done so, use <code>pg_ctl</code> to start a PostgreSQL server on your local machine.</p>
+
+<p>Grab the database dump <code>retail_schema_20250826.dump</code> from <a href="">here</a>.</p>
+
+<p>With the dump file, you can restore the database <code>cs451</code> as follows:</p>
+
+<pre>
+dropdb --if-exists cs451
+createdb cs451
+
+pg_restore \
+ -d cs451 \
+ --jobs 4 --clean --if-exists \
+ --no-owner --no-acl \
+ retail_schema_20250826.dump
+</pre>
+
+<p>Launch the <code>psql</code> shell to connect to the <code>cs451</code> database that you've restored.
+With the following command:</p>
+
+<pre>
+\dt retail.*
+</pre>
+
+<p>You will see all the tables under the schema <code>retail</code>, as follows:</p>
+
+<pre>
+cs451=# \dt retail.*
+            List of relations
+ Schema |     Name     | Type  |  Owner   
+--------+--------------+-------+----------
+ retail | brand        | table | jimmylin
+ retail | category     | table | jimmylin
+ retail | events       | table | jimmylin
+ retail | product      | table | jimmylin
+ retail | product_name | table | jimmylin
+ retail | session      | table | jimmylin
+ retail | user         | table | jimmylin
+(7 rows)
+</pre>
+
+<p>As a sanity check, issue a simple SQL query:</p>
+
+<pre>
+cs451=# select * from retail.events limit 10;
+       event_time       | event_type |              session_id              | product_id |   price   
+------------------------+------------+--------------------------------------+------------+-----------
+ 2019-09-30 20:00:00-04 | view       | 72d76fde-8bb3-4e00-8c23-a032dfed738c |   44600062 |     35.79
+ 2019-09-30 20:00:00-04 | view       | 9333dfbd-b87a-4708-9857-6336556b0fcc |    3900821 |     33.20
+ 2019-09-30 20:00:01-04 | view       | 566511c2-e2e3-422b-b695-cf8e6e792ca8 |   17200506 |    543.10
+ 2019-09-30 20:00:01-04 | view       | 7c90fc70-0e80-4590-96f3-13c02c18c713 |    1307067 |    251.74
+ 2019-09-30 20:00:04-04 | view       | c6bd7419-2748-4c56-95b4-8cec9ff8b80d |    1004237 | 108198.00
+ 2019-09-30 20:00:05-04 | view       | 0d0d91c2-c9c2-4e81-90a5-86594dec0db9 |    1480613 |    908.62
+ 2019-09-30 20:00:08-04 | view       | 4fe811e9-91de-46da-90c3-bbd87ed3a65d |   17300353 |    380.96
+ 2019-09-30 20:00:08-04 | view       | 6280d577-25c8-4147-99a7-abc6048498d6 |   31500053 |     41.16
+ 2019-09-30 20:00:10-04 | view       | ac1cd4e5-a3ce-4224-a2d7-ff660a105880 |   28719074 |    102.71
+ 2019-09-30 20:00:11-04 | view       | 406c46ed-90a4-4787-a43b-59a410c1a5fb |    1004545 |    566.01
+(10 rows)
+</pre>
+
+<p>If you've gotten this far, it appears that you've successfully restored the operational database!  🎉</p>
+
+<h4 style="padding-top: 10px">Understand the Operational Database</h4>
+
+<p>Take some time to understand the operational database.
+There are no specific assignment questions associated with this task, but the remainder of the assignment will be a lot easier if you actually understand what you're doing...</p>
+
+<p>A starting point would be <a href="https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store">the dataset</a> this assignment was built on.
+For reference, these are the tables and their schemas in the PostgreSQL dump you've been given:</p>
+
+<ul>
+
+<li><code>user</code>: (<code>user_id</code>, <code>gender</code>, <code>birthdate</code>)</li>
+<li><code>session</code>: (<code>session_id</code>, <code>user_id</code>)</li>
+<li><code>product</code>: (<code>product_id</code>, <code>brand</code>, <code>category</code>, <code>product_name</code>)</li>
+<li><code>product_name</code>: (<code>category</code>, <code>product_name</code>, <code>description</code>)</li>
+<li><code>events</code>: (<code>event_time</code>, <code>event_type</code>, <code>session_id</code>, <code>product_id</code>, <code>price</code>)</li>
+<li><code>category</code>: (<code>category</code>, <code>description</code>)</li>
+<li><code>brand</code>: (<code>brand</code>, <code>description</code>)</li>
+
+</ul>
+
+<p>You want to understand the real-world entities that each table is modeling, the schema of each table and how they interact (i.e., primary key&mdash;foreign key relationships).
+Do some exploratory data analysis, i.e., "poking around".
+For example, join two tables to trace the PK/FK.
+Join multiple tables to reconstruct a session: be able to identify what was purchased, by whom, for how much, etc.</p>
+</p>
+
+<h4 style="padding-top: 10px">Let's <i>Acutually</i> Get Started</h4>
+
+<p>The Jupyter notebook that contains the actual assignment is available <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/assignment2.ipynb">here</a>.
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
 
