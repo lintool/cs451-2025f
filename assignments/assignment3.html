@@ -79,11 +79,65 @@
 
 <h3>Assignment 3: Data Science and Spark Algorithms  <small>due 10am October 9</small></h3>
 
-<p>This assignment is "ready", but the "surrounding text" unfortunately is not.
-We will be updating this page soon, but in the meantime the assignment notebook is available for you to get started on.</p>
+<p>In this assignment, you'll continue to work with the analytical database from <a href="assignment2.html">assignment 2</a>.
+The data simulates a hypothetical e-commerce site, built on <a href="https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store">this dataset</a>.</p>
 
+<p>At a high-level, you'll do three things:</p>
+
+<ol>
+
+  <li>Analyze the dataset by answering a number of questions about the data, both using SQL queries and DataFrame manipulations.</li>
+  <li>Implement a naive version and a more efficient version of an algorithm for computing means using RDDs.</li>
+  <li>Implement two different join algorithms using RDDs.</li>
+
+</ol>
 
 <p>The Jupyter notebook that contains the actual assignment is available <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/assignment3.ipynb">here</a>.
+Everything should be self explanatory.</p>
+
+<p><i>Implementation Note:</i>
+Not directly relevant to the structure of the assignment or its correctness, but you might have noticed that the RDD algorithms you have been asked to implement are slower than expected (especially in absolute terms).
+This is because the implementation requires the code to unnecessarily cross the Python/JVM boundary.
+A more efficient implementation would push as much over to the JVM as possible, e.g., with implementations in Scala or Java.
+We're not asking you to do that, and hence the RDD transformations will take a performance hit.
+</p>
+
+<h4 style="padding-top: 10px">Assignment Submission</h4>
+
+<p>
+As before, you will be provided a link (soon!) to create an assignment repo for submission.
+<!-- Use <a href="https://classroom.github.com/a/bjdNjjIL">this link</a> to create an assignment repo for submission. -->
+In the assignment repo, enter your answers in <code>assignment3.ipynb</code>.
+In addition, we will ask you to submit a few more files, but those details will be provided later.
+Submit the assignment by committing your edits and pushing your repo (with the answers filled out in the notebook) back to origin.</p>
+
+
+<h4 style="padding-top: 10px">Grading Scheme</h4>
+
+<ul>
+
+  <li><code>codecell_31a</code> and <code>codecell_31b</code>: Q1 using SQL/DataFrames: 3 points each, 6 points total</li>
+  <li><code>codecell_32a</code> and <code>codecell_32b</code>: Q2 using SQL/DataFrames: 3 points each, 6 points total</li>
+  <li><code>codecell_33a</code> and <code>codecell_33b</code>: Q3 using SQL/DataFrames: 3 points each, 6 points total</li>
+  <li><code>codecell_34a</code> and <code>codecell_34b</code>: Q4 using SQL/DataFrames: 3 points each, 6 points total</li>
+  <li><code>codecell_35a</code> and <code>codecell_35b</code>: Q5 using SQL/DataFrames: 3 points each, 6 points total</li>
+  <li><code>codecell_36a</code>, <code>codecell_36b</code>, <code>codecell_36c</code>: Q6 using SQL/DataFrames (3 points each) + plot (2 points): 8 points total</li>
+  <li><code>codecell_37a</code>, <code>codecell_37b</code>, <code>codecell_37c</code>: Q7 using SQL/DataFrames (3 points each) + plot (2 points): 8 points total</li>
+  <li><code>codecell_5x1</code> and <code>codecell_5x2</code>: algorithms for computing averages: 6 points each, 12 points total</li>
+  <li><code>codecell_61a</code>: shuffle join implementation: 8 points</li>
+  <li><code>codecell_62a</code>: hash join implementation: 8 points</li>
+  <li><code>qcell_7x1290</code>: performance comparisons: 7 points</li>
+  <li>Explanation of how you used generative AI for this assignment: 3 points (this goes in <code>README.md</code>)</li>
+  <li>Following instructions: 6 points</li>
+
+</ul>
+
+<p>What does "following instructions" mean? These are "free points" if you follow the instructions provided in this assignment.
+These points are to handle the scenario where all your answers are correct, but you <i>did not</i> follow the instructions and that caused us to go out of our way to fix your submission so that it conforms to the instructions.
+(For example, you removed the ids that we used for tracking, which would make it much more difficult to grade.)
+In these and other related cases, we will dock points from this category.</p>
+
+<p><b>Total:</b> 90 points</p>
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
 
