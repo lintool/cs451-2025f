@@ -128,6 +128,60 @@ jupyter lab
 <p>The above instructions provide a starting point.
 There are many variations, especially for different operating systems, so YMMV.</p>
 
+<h3>Using the Student Linux Environment</h3>
+
+<p>For anyone interested in using the student Linux servers to complete course assignments, please follow the steps outlined <a href="https://uwaterloo.ca/math-faculty-computing-facility/accessing-student-linux-servers" target="_blank">here</a> to get access. <strong>This option is highly recommended for Windows users,</strong> since assignment notebooks may not run seamlessly on Windows, even if using WSL.</p>
+
+<p>Once you're logged into the server, follow these installation steps:</p>
+
+<pre>
+# Download Miniconda installer
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+# Run the installer
+bash miniconda.sh -b -p $HOME/miniconda
+# Initialize conda in your shell
+eval "$($HOME/miniconda/bin/conda shell.bash hook)"
+conda init
+# Create course environment
+conda create -n cs451 python=3.10 -y
+conda activate cs451
+
+# Java 21 + Maven
+conda install -c conda-forge openjdk=21 maven -y
+# Python libraries
+pip install findspark numpy jupyterlab
+# Spark 4.0.0 prebuilt with Hadoop 3.4+
+wget https://archive.apache.org/dist/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz
+tar -xvzf spark-4.0.0-bin-hadoop3.tgz -C $HOME
+
+# Set environment variables. Add these two lines to the bottom of your ~/.bashrc:
+export SPARK_HOME="/path/to/spark-4.0.0-bin-hadoop3"
+export PATH="$PATH:$SPARK_HOME/bin"
+
+# Reload shell
+source ~/.bashrc
+</pre>
+
+<p>Here's how to verify everything works:</p>
+
+<pre>
+# Ensure conda course environment is activated then run the following commands
+spark-shell --version # should print Spark info
+jupyter lab # launch JupyterLab
+</pre>
+
+<p>When you start JupyterLab from the terminal, it will display a few links. Copy any one of them into your browser on your local machine to open and work with the notebook.</p>
+
+<h4>Using the VS Code Remote SSH Extension</h4>
+
+<p>The <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh">Remote - SSH extension</a> lets you use any remote machine with a SSH server as your development environment.</p>
+
+<p>After connecting to the student linux environment using your SSH credentials, open a directory for your assignments - this will relaunch VS Code requiring you to provide your SSH password again.</p>
+
+<p>Opening a <code>.ipynb</code> notebook should render the notebook, allowing it to be run and edited. Clicking the ⊳ next to an executable cell should prompt you to install Jupyter extension pack. Accepting this will allow you to pick the python interpreter that will be used. One of these options should be cs451 conda environment you created earlier - select this one.</p>
+
+<p>To verify everything works, try editing the first executable cell to include <code>print("VS Code + Jupyter is working!")</code> and see if this is printed after clicking the ⊳ next to the cell.</p>
+
 <h3>Different Entry Points</h3>
 
 <p>While the assignments are to be turned in via Jupyter notebooks, it is not necessarily the case that they are the most convenient development environment.
