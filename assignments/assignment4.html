@@ -79,10 +79,112 @@
 
 <h3>Assignment 4 <small>due 10am October 30</small></h3>
 
-<p>‼️ This assignment isn't "ready" until the release date specified in the <a href="../syllabus.html">course syllabus</a>.
-Anything (questions, grading scheme, etc.) might arbitrarily change before the release date.
-<i>Start this assignment before the release date at your own risk.</i>
-After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p>
+<p>‼️ This assignment isn't ready yet, but we have posted enough for you to get started if you wish...
+The final form of the assignment will be additive with respect to what's posted here.
+This means that if you get started now, you won't be doing anything "wasted".</p>
+
+<p>As we discussed in lecture, most of data science and machine learning from the data engineering perspective in industry comprises data cleaning, data manipulations, and data munging.
+In fact, most of "applied machine learning" in industry isn't about "machine learning" per se.
+This is reflected in the assignment.</p>
+
+<p>In this assignment, you will build a web spam classifier based on the work described in <a href="http://arxiv.org/abs/1004.5168">Efficient and Effective Spam Filtering and Re-ranking for Large Web Datasets</a> by Cormack, Smucker, and Clarke. 
+No need to specifically read the paper, as we'll walk you through the implementation.
+Nevertheless, the paper might be interesting from the perspective of providing background.</p>
+
+<p>At a high level, you'll start with feature files for training and test data.
+These files contain the feature vectors for the instances that you'll classify, as well as the "ground truth" label (either spam or ham).
+You'll munge these feature vectors into SciPy's <code>csr_matrix</code> representation, detailed <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html">here</a>, and then train different models.
+Literally:</p>
+
+<pre>
+model.fit(X, y)
+</pre>
+
+<p>That's the "actual machine learning".
+You'll then explore model variants and perform a few common analyses.
+The main implementation part of the assignment is, basically, data munging.
+In fact, the assignment doesn't even use Spark.
+That is, your implementation will read files directly from the file system.</p>
+
+<p><i>Why?</i> The datasets we provide to you, while relatively small, already lie at the end of a data cleaning and feature extraction pipeline that starts from datasets hundreds of GBs in size.
+In this assignment, we're skipping that part and handing you the feature vectors directly, but those aspects of the data transformation likely require the distributed processing capabilities offered by Spark.
+So keep that in mind as you're doing this assignment; we're already simplifying.</p>
+
+
+<h4 style="padding-top: 10px">Downloading Data</h4>
+
+<p>Download the following datasets and unpack somewhere:</p>
+
+<div style="width: 75%">
+<table class="table table-striped">
+<thead><tr><td><b>File</b></td><td><b>MD5</b></td><td><b>Size</b></td></tr></thead>
+<tr><td><code><a href="https://www.dropbox.com/scl/fi/2bgz3ng1xkhww8cn36htu/spam.train.txt.gz?rlkey=thui9ee5poqtkc8hfddrvucuj&dl=0">spam.train.txt.gz</a></code></td><td><code>73a823d6d3a2d9c7d2756047c0fbf925</code></td><td>10 MB</td></tr>
+<tr><td><code><a href="https://www.dropbox.com/scl/fi/nhznqa45sphowu5fgh7fr/spam.test.txt.gz?rlkey=j5dgvft5smwf0hxgu1zbdc2h0&dl=0">spam.test.txt.gz</a></code></td> <td><code>9d7c0f177a7a71b7c495711bb2335fe4</code></td><td>485 MB</td></tr>
+</table>
+</div>
+
+<p>MD5 checksums are provided to confirm the integrity of what you've downloaded.</p>
+
+<h4 style="padding-top: 10px">Understanding the Features</h4>
+
+<p>The features used to represent the web pages for the spam classifier are hashed byte <a href="https://en.wikipedia.org/wiki/N-gram">4-grams</a>.
+Pages are sliced into overlapping 4-grams, and then hashed.
+From the paper:</p>
+
+<p style="padding: 0px 20px 0px 20px">
+That is, if the page consisted of “pq xyzzy” the features would be simply “pq x”, “q xy”, “ xyz ”, “xyzz”, and “yzzy”. 
+Each feature was represented as a binary quantity indicating its presence or absence in the page.
+</p>
+
+<p>To re-iterate, the features are integers.
+The features are binary: does the page contain the hashed 4-gram or not.</p>
+
+<p>Take a look at <code>spam.train.txt</code>. The first line begins as follows:</p>
+
+<pre>
+clueweb09-en0094-20-13546 spam 387908 697162 426572 161118 688171 ...
+</pre>
+
+<p>In the file, each training instance is on a line.
+Each line begins with a document id, the string "spam" or "ham" (the label), and a list of integers (the features).
+Throughout this assignment, assume spam = 1 and ham = 0.</p>
+
+<p>Before you can train a model, you'll need to build <code>X</code> and <code>y</code>:</p>
+
+<pre>
+model.fit(X, y)
+</pre>
+
+<p>The variable <code>X</code> will have type <code>csr_matrix</code> and the variable <code>y</code> will have the type <code>ndarray</code>; these variables are exactly those that we discussed in lecture, showing up in the slides.
+The <code>shape</code> of the <code>csr_matrix</code> will be (<code>num_examples</code>, <code>dim</code>), where <code>num_examples</code> is the number of instances (for example, in the training set).
+You'll have to figure out what <code>dim</code> should be, which is the number of dimensions in each (sparse) feature vector.
+You'll also have to figure out what the <code>shape</code> of <code>y</code> should be.</p>
+
+<p>What's <code>shape</code>?
+If you don't already know, you'll have to figure this out yourself.
+Consider it Q0 of the assignment.</p>
+
+<p>What's <code>dim</code>?
+Here's a hint: The features are hash values, right?
+Say you look through all the feature vectors, and observe the max of the hash values to be <code>N</code>.
+How many unique features are there?
+(Keep in mind that 0 is a possible hash value.)
+The number of unique features is the number of dimensions in each (sparse) feature vector, which will also determine the <code>shape</code> of <code>X</code> and <code>y</code>.
+Another hint: the training and test sets must have the same <code>dim</code>; otherwise, prediction just wouldn't work.
+(However, <code>num_examples</code> can be different.)</p>
+
+<h4 style="padding-top: 10px">The Assignment Notebook and Submission</h4>
+
+<p>The Jupyter notebook that contains the actual assignment is available <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/assignment4.ipynb">here</a>.
+Given the setup provided above, the notebook should be self explanatory.</p>
+
+<p>Like before, a GitHub invite link will be created for this assignment, coming soon!</p>
+
+<p>Submit the assignment by committing your edits and pushing your repo (with the answers filled out in the notebook) back to origin.</p>
+
+<h4 style="padding-top: 10px">Grading Scheme</h4>
+
+<p>Coming soon!</p>
 
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
