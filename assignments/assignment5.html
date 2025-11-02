@@ -77,12 +77,208 @@
     </ul>
   </div>
 
-<h3>Assignment 5 <small>due 10am November 13</small></h3>
+<h3>Assignment 5 <small>due 10am November 18</small></h3>
 
 <p>‼️ This assignment isn't "ready" until the release date specified in the <a href="../syllabus.html">course syllabus</a>.
 Anything (questions, grading scheme, etc.) might arbitrarily change before the release date.
 <i>Start this assignment before the release date at your own risk.</i>
 After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p>
+
+<p>In this assignment you'll be implementing indexing and retrieval.
+Specifically, you will build:</p>
+
+<ul>
+
+  <li>An indexer in PySpark that builds a plain-text inverted index.</li>
+  <li>A simple boolean retrieval engine (i.e., search engine) that performs boolean retrieval using the plain-text inverted index.</li>
+  <li>An indexer in PySpark that builds a compressed (binary-encoded) inverted index.</li>
+  <li>A simple boolean retrieval engine (i.e., search engine) that performs boolean retrieval using the compressed (binary-encoded) inverted index.</li>
+
+</ul>
+
+<h4 style="padding-top: 10px">Downloading Data</h4>
+
+<p>Download <code><a href="https://cs.uwaterloo.ca/~jimmylin/cs451-2025f/corpus-enwiki-sample.txt.gz">corpus-enwiki-sample.txt.gz</a></code>.
+The file is 716 MB and has an MD5 checksum of <code>feb030231d6746d3a3c7c59d8c96a0bc</code>.</p>
+
+<p>Once you download the corpus, uncompress it.
+The file should be 1.9 GB and have an MD5 checksum of <code>4fe0c91d72b237fd938406550ad7ec60</code>.</p>
+
+<p>The corpus is a sample from Wikipedia.
+For this assignment, we'll be treating each sentence from Wikipedia as a separate "document", so in fact we'll be indexing and searching Wikipedia sentences.
+</p>
+
+<p>Look at the first three lines of the file:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+0	Anarchism.0004	Anarchism is usually considered a far-left ideology and much of anarchist economics and anarchist legal philosophy reflects anti-authoritarian interpretations of communism , collectivism , syndicalism , mutualism , or participatory economics .
+1	Anarchism.0027	By the time of the French Revolution , some such as the Enraged Ones began to use the term positively in opposition to Jacobin centralisation of power , seeing `` revolutionary government '' as oxymoronic .
+2	Anarchism.0037	His aversion to the imposition of a rules-based society led him to denounce as a manifestation of the people 's `` mental enslavement '' the foundations of law , property rights and even the institution of marriage .
+</pre>
+</div>
+
+<p>The format is the docid (uniquely numbered), followed by a tab, followed by the actual "document" content.
+The content contains the article title, followed by a tab, followed by a sentence.
+However, treat the article title and the sentence together as "the document" (for the purposes of indexing).</p>
+
+<p>There are 10,805,214 "documents" (i.e., lines) in <code>corpus-enwiki-sample.txt</code>.
+It might be unwieldy to work with the entire corpus all at once, especially if you are debugging and want a faster iteration cycle.
+Feel free to create a smaller subset of the corpus for this purpose.
+</p>
+
+<h4 style="padding-top: 10px">Inverted Indexing: Uncompressed</h4>
+
+<p>Your first task is to implement the inverted indexing algorithm <a href="https://lintool.github.io/cs451-2025f/slides/cs451-2025f-week09b-slides-v1.01.pdf#page=25">here</a>, in PySpark, using RDDs.
+The inverted indexing algorithm you'll implement buffers all the postings and then sorts based on docid.
+There are inefficiencies associated with this approach, as we discussed in lecture, but that's fine for this assignment.</p>
+
+<p>We provide a stub <a href="build_index_uncompressed.py"><code>build_index_uncompressed.py</code></a> for you to get started.
+To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
+Please do not change anything other than the parts specified in the stub code.</p>
+
+<p>In this first implementation, we will build an inverted index that does not use any compression.
+The entire index will be in plain text and human readable.
+The text representation of each postings list should look like the following:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+term df docid1:tf1 docid2:tf2 ...
+</pre>
+</div>
+
+<p>That is, each postings list is contained on a line, and each line starts with the term, which is the output key in PySpark.
+The term is followed by a tab.
+The remainder of the line is the postings list itself (the PySpark value).
+Each postings list begins with the df, or document frequency.
+The document frequency is the count of the number of documents that contain the term.
+After the df, there should be exactly that number of <code>docid:tf</code> tuples (space delimited).
+That is, if df=10, there should be exactly 10 <code>docid:tf</code> tuples, each denoting a document that contains the term.
+The tf specifies the number of times that the term appears in the document.
+</p>
+
+<p>Your task is to write an indexer that takes a corpus and generates an inverted index in exactly the format specified above.
+That is, the output of your PySpark job should be an index directory, and in that index directory there should be a bunch of part files (e.g., <code>part-00000</code>).
+Each part file should be a plain-text file, and each line should exactly be in the format above.
+Across all the part files in your index directory, there should be one line for each unique term in the vocabulary.
+</p>
+
+<p>The following is the desired I/O behavior of the program you'll write.
+We'll issue the following command:
+</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+spark-submit build_index_uncompressed.py -input corpus-enwiki-sample.txt -output index-enwiki-uncompressed
+</pre>
+</div>
+
+<p>Which will execute your program.
+The result of executing your program will be an index directory <code>index-enwiki-uncompressed/</code> that conforms to the specification outlined above.
+Use the <code>tokenize</code> function in the stub Python script to tokenize the documents.
+</p>
+
+<h4 style="padding-top: 10px">Boolean Retrieval: Uncompressed</h4>
+
+<p>Next, you'll write a simple boolean retrieval engine (i.e., search engine) that performs boolean retrieval using the plain-text inverted index you've just built.</p>
+
+<p>We'll make a significant simplification in the queries.
+Instead of supporting arbitrarily nested boolean expressions, you will assume that all queries are interpreted from left to right in a greedy manner.
+That is:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+a OR b AND c
+</pre>
+</div>
+
+<p>Will be interpreted as:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+(a OR b) AND c
+</pre>
+</div>
+
+<p>That is, you can read the query from left to right, and greedily apply the operator (OR, AND) to the operands.</p>
+
+<p>To be more precise, your boolean retrieval engine will operate term at a time, as discussed in class and described <a href="https://lintool.github.io/cs451-2025f/slides/cs451-2025f-week09b-slides-v1.01.pdf#page=44">here</a>.</p>
+
+<p>We provide a stub <a href="boolean_retrieval_uncompressed.py"><code>boolean_retrieval_uncompressed.py</code></a> for you to get started.
+To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
+Please do not change anything other than the parts specified in the stub code.</p>
+
+<p>The following is the desired I/O behavior of the program you'll write.
+We'll issue the following command:
+</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+python boolean_retrieval_uncompressed.py -corpus corpus-enwiki-sample.txt -index index-enwiki-uncompressed -query "waterloo AND canada"
+</pre>
+</div>
+
+<p>Which will execute your program.
+The output of executing your program should be, printed to stdout, the results of the query, each result on a line.
+That is, if there are 10 results to the query, the output should be precisely 10 lines.
+For each result, print the Wikipedia article "title" (e.g., <code>Anarchism.0004</code> above), followed by a tab, followed by the sentence.
+For the sentence, remove all newlines.
+If the resulting string is less than 100 chracters, print the entire string;
+if the string is longer than 100 characters, print out only the first 100 characters, followed by the string "...".
+So it'll look something like this (for a hypothetical query):</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+Waterloo, Ontario.0004	At the time of the 2016 census , the population of Waterloo was 104,986 .
+Waterloo, Ontario.0010	They bought deeds to land parcels from Beasley and began moving into the area in 1804 .
+Waterloo, Ontario.0025	By the 1840s , German settlers had overtaken the Mennonites as the dominant segment of the populatio...
+</pre>
+</div>
+
+<p>This will make the results easy to skim.
+Please follow this result format so that our grading scripts and easily verify your output.
+</p>
+
+
+<h4 style="padding-top: 10px">Inverted Indexing: Compressed</h4>
+
+<p>TBD</p>
+
+<h4 style="padding-top: 10px">Boolean Retrieval: Compressed</h4>
+
+<p>TBD</p>
+
+<h4 style="padding-top: 10px">Assignment Submission</h4>
+
+<!--
+
+<p>The Jupyter notebook that contains the actual assignment is available <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/assignment4.ipynb">here</a>.
+Given the setup provided above, the notebook should be self explanatory.</p>
+
+<p>Use <a href="https://classroom.github.com/a/Pa0CgNAI">this link</a> to create an assignment repo for submission.
+In the assignment repo, enter your answers in <code>assignment4.ipynb</code>.</p>
+
+<p>In addition, please <i>explicitly</i> add the following files in your repo (at top level):</p>
+
+<ul>
+
+  <li><code>A4_load_data.py</code></li>
+  <li><code>4e.png</code>: ROC curve of LR</li>
+  <li><code>4f.png</code>: ROC curve of SGD</li>
+  <li><code>4g.png</code>: ROC curve of mystery</li>
+  <li><code>4h.png</code>: ROC curve of all three classifiers</li>
+  <li><code>6a.png</code>: exploration of dataset size</li>
+
+</ul>
+
+<p>Submit the assignment by committing your edits and pushing your repo (with the answers filled out in the notebook) back to origin.</p>
+
+-->
+
+<h4 style="padding-top: 10px">Grading Scheme</h4>
+
+
+<p>TBD</p>
 
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
