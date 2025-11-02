@@ -77,10 +77,123 @@
     </ul>
   </div>
 
-<h3>Final Project <small>due TBD</small></h3>
+<h3>Final Project <small>due 10am December 15</small></h3>
 
-<p>Note that the final project is only applicable for CS 651.
+<p>The final project is a requirement only for graduate students taking CS 651.
 There is no final project for CS 451.</p>
+
+<h4 style="padding-top: 10px">Project Requirements</h4>
+
+<p>At the highest level, I would like you to:</p>
+
+<ol>
+
+  <li>Pick a dataset that you find interesting.</li>
+  <li>Do some interesting data science to reveal some insights.</li>
+  <li>Build an MCP server so I can "talk to the dataset".</li>
+
+</ol>
+
+<p>I'll try to articulate what I'm looking for with a running example:</p>
+
+<p><b>(1)</b> This is a dataset that I find interesting:
+some information on <a href="https://github.com/lintool/cs-big-cows/tree/master/acm-fellows">ACM Fellows</a> and <a href="https://github.com/lintool/cs-big-cows/tree/master/acm_turing_awards">ACM Turing Award winners</a>.
+</p>
+
+<p><b>(2)</b>
+Why? I'm interested in the <a href="https://www.science.org/doi/10.1126/science.aao0185">science of science</a>, a scientific exploration of how science "gets done".
+In particular, being a computer scientist, I am interested in an introspective examination of my own field.
+One way to approach this is to "start from the end", i.e., the honors that the field bestows on accomplished individuals.
+For computer science, looking at ACM Fellows and ACM Turing Award winners captures (some aspects of) this.
+And, as it turns out, there's already a dataset (albeit out of date) that captures this data.
+(A previous student of mine built it!)</p>
+
+<p>With this dataset, one might be able to answer a number of interesting questions.
+For example:</p>
+
+<ul>
+
+  <li>What sub-disciplines of computer science are represented by the ACM Fellows?</li>
+  <li>What topics are they recognized for?</li>
+  <li>How did this evolve over time?</li>
+  <li>What are the demographic characteristics of the fellows?</li>
+
+</ul>
+
+<p>An initial attempt at answering some of these questions can be found <a href="https://github.com/castorini/ura-projects/issues/2">here</a>.</p>
+
+<p>Answers to these questions would reveal insights, thus addressing point (2) above.
+This requires data science, along the lines of everything we've discussed in this course:
+data cleaning, data munging, analytics over various aspects of the data, some method of presenting insights (e.g., graphs).</p>
+
+<p>You'll deliver these insights in a notebook.</p>
+
+<p><b>(3)</b> 
+The downside of delivering insights in a notebook is that a notebook is (mostly) static.
+Follow-up interactions are limited to whatever's already provided in the notebook, or I'll have to write additional code.
+Wouldn't it be nice if I could "talk to my dataset" via an LLM?
+This is what <a href="https://modelcontextprotocol.io/docs/getting-started/intro">MCP</a> (potentially) solves.</p>
+
+<p>For this part, write an MCP server that exposes tools for accessing your dataset in interesting ways.
+These "interesting ways" might correspond to answering the questions you've posed above.
+Once you expose a tool via MCP, an LLM (Claude, for example), can call the server, fetch data, and compose it further as part of normal LLM responses and interactions.</p>
+
+<p>As an example, we've exposed the search functionality in my group's <a href="https://pyserini.io/">Pyserini</a> IR toolkit in MCP and <a href="https://x.com/lintool/status/1929556643961840040">connected it to Claude</a>; see additional details <a href="https://github.com/castorini/pyserini/blob/master/docs/usage-mcp.md">here</a>.
+Claude can call Pyserini via MCP, search a collection of documents, and then "do interesting things with the results".
+One example is to rewrite all the results in the style of Shakespeare's Sonnets.</p>
+
+<p>I've left this intentionally vague to provide you the freedom to explore MCP.</p>
+
+<h4 style="padding-top: 10px">Additional Project Details</h4>
+
+<p>This final project can be done individually or in pairs.
+For calibration, the amount of effort I expect for the project is roughly two assignments (per person).
+So if you're working with a partner, I would expect something like four assignments worth of effort.</p>
+
+<p>In terms of the "interesting dataset", it's completely up to you.
+I actually wouldn't mind someone working on exactly the ACM Fellows dataset described above.
+Other potentially interesting datasets:</p>
+
+<ul>
+
+<li><a href="https://huggingface.co/datasets/allenai/WildChat-4.8M">WildChat</a>, a public dump of LLM prompts.</li>
+<li><a href="https://canadaspends.com/en">Canadian government spending</a></li>
+<li><a href="https://ourworldindata.org/">Our World in Data</a></li>
+
+</ul>
+
+<p>In terms of grading, half of the grade will be (2) and half the grade will be (3).
+Given the open-ended nature of the project, it is not possible to produce a detailed rubric, <i>but</i>, as part of the project checkpoint (below), we can negotiate expectations in more detail.</p>
+
+
+<h4 style="padding-top: 10px">Project Checkpoint</h4>
+
+<p>When you are ready, send me <code>(jimmylin@uwaterloo.ca)</code> an email describing what you'd like to work on.
+That is: (1) what dataset, (2) what types of insights, and (3) what the MCP server will expose.
+I will provide you with feedback on appropriateness and scope of your proposed project.
+The "soft" deadline for this proposal is November 11.
+There is no penalty if you miss this deadline, but it is in your best interest to not leave this "proposal" to the last minute.</p>
+
+
+<h4 style="padding-top: 10px">Final Project Delivery</h4>
+
+<p>The final project is due 10am on December 15.</p>
+
+<p>The actual project deliverable is a GitHub repo.
+The repo may be public (if you wish) or private.
+In the repo, I expect at least the following:</p>
+
+<ul>
+
+  <li>One or more notebooks addressing point (2).</li>
+  <li>The implementation of the MCP server addressing point (3).</li>
+  <li>One or more screen recordings showing examples of an LLM interacting with your MCP server (something like <a href="https://x.com/lintool/status/1929556643961840040">this</a> but more detailed). This is needed because I may not be able to get your actual MCP server running.</li>
+  <li>A README that ties everything together, e.g., explaining what is what, providing pointers to relevant components, etc.</li>
+
+</ul>
+
+<p>In the process of performing data science, it is likely you'll have additional scripts for data cleaning, data munging, etc.
+Include these scripts in your repo also.</p>
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
 
