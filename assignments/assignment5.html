@@ -79,12 +79,7 @@
 
 <h3>Assignment 5 <small>due 10am November 18</small></h3>
 
-<p>‼️ This assignment isn't "ready" until the release date specified in the <a href="../syllabus.html">course syllabus</a>.
-Anything (questions, grading scheme, etc.) might arbitrarily change before the release date.
-<i>Start this assignment before the release date at your own risk.</i>
-After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p>
-
-<p>In this assignment you'll be implementing indexing and retrieval.
+<p>In this assignment you'll be implementing indexing and retrieval for lexical vectors (i.e., bag of words).
 Specifically, you will build:</p>
 
 <ul>
@@ -174,7 +169,7 @@ spark-submit build_index_uncompressed.py -input corpus-enwiki-sample.txt -output
 </div>
 
 <p>Which will execute your program.
-The result of executing your program will be an index directory <code>index-enwiki-uncompressed/</code> that conforms to the specification outlined above.
+The result of executing your program should be an index directory <code>index-enwiki-uncompressed/</code> that conforms to the specification outlined above.
 Use the <code>tokenize</code> function in the stub Python script to tokenize the documents.
 </p>
 
@@ -182,7 +177,8 @@ Use the <code>tokenize</code> function in the stub Python script to tokenize the
 
 <p>Next, you'll write a simple boolean retrieval engine (i.e., search engine) that performs boolean retrieval using the plain-text inverted index you've just built.</p>
 
-<p>We'll make a significant simplification in the queries.
+<p>Your boolean retrieval engine will operate a term at a time, as discussed in class and described <a href="https://lintool.github.io/cs451-2025f/slides/cs451-2025f-week09b-slides-v1.01.pdf#page=44">here</a>.
+However, we'll make a significant simplification in the queries.
 Instead of supporting arbitrarily nested boolean expressions, you will assume that all queries are interpreted from left to right in a greedy manner.
 That is:</p>
 
@@ -201,8 +197,6 @@ a OR b AND c
 </div>
 
 <p>That is, you can read the query from left to right, and greedily apply the operator (OR, AND) to the operands.</p>
-
-<p>To be more precise, your boolean retrieval engine will operate term at a time, as discussed in class and described <a href="https://lintool.github.io/cs451-2025f/slides/cs451-2025f-week09b-slides-v1.01.pdf#page=44">here</a>.</p>
 
 <p>We provide a stub <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/boolean_retrieval_uncompressed.py"><code>boolean_retrieval_uncompressed.py</code></a> for you to get started.
 To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
@@ -236,49 +230,164 @@ Waterloo, Ontario.0025	By the 1840s , German settlers had overtaken the Mennonit
 </div>
 
 <p>This will make the results easy to skim.
-Please follow this result format so that our grading scripts and easily verify your output.
+Please follow this result format so that your output is easy to verify.
 </p>
 
 
 <h4 style="padding-top: 10px">Inverted Indexing: Compressed</h4>
 
-<p>TBD</p>
+<p>Now we're going to add compression to the inverted indexing algorithm.
+Specifically:</p>
+
+<ol>
+
+<li>Use vbyte encoding for <i>all</i> ints. We've provided implementations of the encoder and the decoder.</li>
+<li>Use delta encoding for the docids. That is, instead of encoding the docids themselves, encode the difference between successive docids.</li>
+
+</ol>
+
+<p>We provide a stub <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/build_index_compressed.py"><code>build_index_compressed.py</code></a> for you to get started.
+To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
+Please do not change anything other than the parts specified in the stub code.</p>
+
+<p>Your implementation should use the same algorithm as in the uncompressed version (PySpark, with RDDs).
+The only difference is that each postings list should be a <code>bytearray</code>, not a <code>str</code>.
+The postings lists should be identical from the logical perspective &mdash; that is, consisting of the df and (docid, tf) tuples.
+Thus, the entire inverted index should be a <code>dict</code> from terms (i.e., <code>str</code>s) to <code>bytearray</code>s.
+The output of your indexer should be a single file, <i>not</i> a directory.
+<i>Hint:</i> Take the index and pickle it.</p>
+
+<p>The following is the desired I/O behavior of the program you'll write.
+We'll issue the following command:
+</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+spark-submit build_index_compressed.py -input corpus-enwiki-sample.txt -output index-enwiki-compressed
+</pre>
+</div>
+
+<p>Which will execute your program.
+The result of executing your program should be a <i>single file</i> named <code>index-enwiki-compressed</code> that conforms to the specification outlined above.
+Use the <code>tokenize</code> function in the stub Python script to tokenize the documents.
+Use the <code>vint_encode</code> function in the stub Python script to perform vbyte encoding.
+</p>
+
 
 <h4 style="padding-top: 10px">Boolean Retrieval: Compressed</h4>
 
-<p>TBD</p>
+<p>And, as expected, you'll write a simple boolean retrieval engine (i.e., search engine) that performs boolean retrieval using the compressed inverted index you've just built.
+The behavior of this retrieval engine should be identical as before, except that it operates over the compressed index.</p>
+
+<p>We provide a stub <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/boolean_retrieval_compressed.py"><code>boolean_retrieval_compressed.py</code></a> for you to get started.
+To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
+Please do not change anything other than the parts specified in the stub code.
+Use the <code>vint_decode_one</code> function in the stub Python script to perform vbyte decoding.</p>
+
+<p>The following is the desired I/O behavior of the program you'll write.
+We'll issue the following command:
+</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+python boolean_retrieval_compressed.py -corpus corpus-enwiki-sample.txt -index index-enwiki-compressed -query "waterloo AND canada"
+</pre>
+</div>
+
+<p>Which will execute your program.
+The output should be identical to the uncompressed version above.</p>
 
 <h4 style="padding-top: 10px">Assignment Submission</h4>
 
 <!--
 
-<p>The Jupyter notebook that contains the actual assignment is available <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/assignment4.ipynb">here</a>.
-Given the setup provided above, the notebook should be self explanatory.</p>
-
-<p>Use <a href="https://classroom.github.com/a/Pa0CgNAI">this link</a> to create an assignment repo for submission.
-In the assignment repo, enter your answers in <code>assignment4.ipynb</code>.</p>
-
-<p>In addition, please <i>explicitly</i> add the following files in your repo (at top level):</p>
-
-<ul>
-
-  <li><code>A4_load_data.py</code></li>
-  <li><code>4e.png</code>: ROC curve of LR</li>
-  <li><code>4f.png</code>: ROC curve of SGD</li>
-  <li><code>4g.png</code>: ROC curve of mystery</li>
-  <li><code>4h.png</code>: ROC curve of all three classifiers</li>
-  <li><code>6a.png</code>: exploration of dataset size</li>
-
-</ul>
-
-<p>Submit the assignment by committing your edits and pushing your repo (with the answers filled out in the notebook) back to origin.</p>
+<p>Use <a href="https://classroom.github.com/a/Pa0CgNAI">this link</a> to create an assignment repo for submission.</p>
 
 -->
 
+<p>A GitHub submission link to create an assignment repo for submission will be provided soon.</p>
+
+<p>Answer the following questions about the sizes of different index variants:</p>
+
+<ol>
+
+  <li>How large is the uncompressed index?</li>
+  <li>How large is the compressed index (per above)?</li>
+  <li>How large is the index with vbyte compression but no delta encoding?</li>
+
+</ol>
+
+<p>Use <code>du -h</code> to compute index sizes.</p>
+
+<p>Questions (1) and (2) above are exactly the sizes of the indexes created by <code>build_index_uncompressed.py</code> and <code>build_index_compressed.py</code>, respectively.
+For question (3), you'll have to tweak code in <code>build_index_compressed.py</code> and rerun.
+<i>Note:</i> Your submission should include all compression techniques specified above; for question (3), we just want an index size measurement based on an one-off run.</p>
+
+<p>Encode the answers as follows in <code>README.md</code>:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+size (1): XX
+size (2): XX
+size (3): XX
+</pre>
+</div>
+
+<p>Where <code>XX</code> is the output of <code>du -h</code>, e.g., "124MB".</p>
+
+<p>Run the following queries using <code>boolean_retrieval_uncompressed.py</code>:
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+"waterloo AND canada"
+"waterloo AND belgium"
+"waterloo OR stanford AND cheriton"
+"big AND data AND hadoop"
+</pre>
+</div>
+
+<p>Store the results in four separate files, <code>r{1,2,3,4}-uncompressed.txt</code>, respectively.</li>
+
+<p>Run the same queries using <code>boolean_retrieval_compressed.py</code>.
+Store the results in four separate files, <code>r{1,2,3,4}-compressed.txt</code>, respectively.</p>
+
+<p>Your assignment repo should have the following files:</p>
+
+<ul>
+
+  <li><code>README.md</code> (with the index sizes, per above).</li>
+  <li>Your implementation of <code>build_index_uncompressed.py</code></li>
+  <li>Your implementation of <code>boolean_retrieval_uncompressed.py</code></li>
+  <li>Your implementation of <code>build_index_compressed.py</code></li>
+  <li>Your implementation of <code>boolean_retrieval_compressed.py</code></li>
+  <li><code>r{1,2,3,4}-uncompressed.txt</code>, per above.</li>
+  <li><code>r{1,2,3,4}-compressed.txt</code>, per above.</p>
+
+</ul>
+
+<p>Submit the assignment by committing your edits and pushing your repo back to origin.</p>
+
 <h4 style="padding-top: 10px">Grading Scheme</h4>
 
+<ul>
 
-<p>TBD</p>
+  <li>Your implementation of <code>build_index_uncompressed.py</code>: 10 points</li>
+  <li>Your implementation of <code>boolean_retrieval_uncompressed.py</code>: 10 points</li>
+  <li>Your implementation of <code>build_index_compressed.py</code>: 10 points</li>
+  <li>Your implementation of <code>boolean_retrieval_compressed.py</code>: 8 points</li>
+  <li>Index sizes: 4 points each, 12 points total</li>
+  <li>The search results. 2 points each, 16 points total</li>
+  <li>Explanation of how you used generative AI for this assignment: 3 points (this goes in <code>README.md</code>)</li>
+  <li>Following instructions: 6 points</li>
+
+</ul>
+
+<p>What does "following instructions" mean? These are "free points" if you follow the instructions provided in this assignment.
+These points are to handle the scenario where all your answers are correct, but you <i>did not</i> follow the instructions and that caused us to go out of our way to fix your submission so that it conforms to the instructions.
+(For example, you removed the ids that we used for tracking, which would make it much more difficult to grade.)
+In these and other related cases, we will dock points from this category.</p>
+
+<p><b>Total:</b> 75 points</p>
 
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
