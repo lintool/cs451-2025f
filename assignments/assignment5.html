@@ -77,7 +77,7 @@
     </ul>
   </div>
 
-<h3>Assignment 5 <small>due 10am November 18</small></h3>
+<h3>Assignment 5: Inverted Indexing and Boolean Retrieval <small>due 10am November 18</small></h3>
 
 <p>In this assignment you'll be implementing indexing and retrieval for lexical vectors (i.e., bag of words).
 Specifically, you will build:</p>
@@ -215,24 +215,38 @@ python boolean_retrieval_uncompressed.py -corpus corpus-enwiki-sample.txt -index
 <p>Which will execute your program.
 The output of executing your program should be, printed to stdout, the results of the query, each result on a line.
 That is, if there are 10 results to the query, the output should be precisely 10 lines.
-For each result, print the Wikipedia article "title" (e.g., <code>Anarchism.0004</code> above), followed by a tab, followed by the sentence.
-For the sentence, remove all newlines.
-If the resulting string is less than 100 chracters, print the entire string;
-if the string is longer than 100 characters, print out only the first 100 characters, followed by the string "...".
-So it'll look something like this (for a hypothetical query):</p>
+The results should be sorted in ascending order of docid.
+Please use the following snippet of code to make the results easy to skim and verify:
+</p>
+
+</p>
 
 <div style="padding-top: 10px; padding-bottom: 10px">
 <pre>
-Waterloo, Ontario.0004	At the time of the 2016 census , the population of Waterloo was 104,986 .
-Waterloo, Ontario.0010	They bought deeds to land parcels from Beasley and began moving into the area in 1804 .
-Waterloo, Ontario.0025	By the 1840s , German settlers had overtaken the Mennonites as the dominant segment of the populatio...
+        sentence_trimmed = sentence[:100] + "..." if len(sentence) > 100 else sentence
+        print(f"{docid:8} {title:72} {sentence_trimmed}")
 </pre>
 </div>
 
-<p>This will make the results easy to skim.
-Please follow this result format so that your output is easy to verify.
+<p>
+For each result, you'll print out the docid, the Wikipedia article "title" (e.g., <code>Anarchism.0004</code> above), and the sentence.
+For the sentence, remove all newlines.
+Based on the above snippet: If the resulting string is less than 100 chracters, print the entire string;
+if the string is longer than 100 characters, print out only the first 100 characters, followed by the string "...".
+So the output will look something like this:</p>
 </p>
 
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+  379526 University of Waterloo.0155                                              St. Paul 's University College is a university college founded by members of the United Church of Ca...
+  379529 University of Waterloo.0174                                              The 2016 -- 2017 Times Higher Education World University Rankings placed Waterloo 173rd in the world...
+  379530 University of Waterloo.0185                                              The 2016 ARWU ranked for the field of engineering and computer science the university 51 -- 75 and s...
+  379531 University of Waterloo.0190                                              In the same year , the ARWU also ranked Waterloo 48th in the world , and second in Canada in the eng...
+  379532 University of Waterloo.0201                                              In the Times ' 2018 ranking for the subject of physical sciences , Waterloo placed 96th in the world...
+</pre>
+</div>
+
+<p>We leave plenty of space for the Wikipedia article "title" because there are some long ones...</p>
 
 <h4 style="padding-top: 10px">Inverted Indexing: Compressed</h4>
 
@@ -299,13 +313,8 @@ The output should be identical to the uncompressed version above.</p>
 
 <h4 style="padding-top: 10px">Assignment Submission</h4>
 
-<!--
-
-<p>Use <a href="https://classroom.github.com/a/Pa0CgNAI">this link</a> to create an assignment repo for submission.</p>
-
--->
-
-<p>A GitHub submission link to create an assignment repo for submission will be provided soon.</p>
+<p>Procedure is the same as previous assignments.
+Use <a href="https://classroom.github.com/a/pKlCsrl8">this link</a> to create an assignment repo for submission.</p>
 
 <p>Answer the following questions about the sizes of different index variants:</p>
 
