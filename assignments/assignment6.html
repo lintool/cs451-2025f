@@ -77,13 +77,179 @@
     </ul>
   </div>
 
-<h3>Assignment 6 <small>due 10am December 2</small></h3>
+<h3>Assignment 6: Single-Source Shortest Path (SSSP) <small>due 10am December 2</small></h3>
 
 <p>‼️ This assignment isn't "ready" until the release date specified in the <a href="../syllabus.html">course syllabus</a>.
 Anything (questions, grading scheme, etc.) might arbitrarily change before the release date.
 <i>Start this assignment before the release date at your own risk.</i>
-After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p>
+After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p> <!-- ' -->
 
+<p>In this assignment you will implement single-source short path (SSSP) with weighted paths in PySpark (with RDDs) and using DuckDB.
+This will give you a sense of how graph algorithms "look" in different approaches.</p>
+
+<h4 style="padding-top: 10px">Downloading Data</h4>
+
+<p>Download <code><a href="https://cs.uwaterloo.ca/~jimmylin/cs451-2025f/graph-data.tar.gz">graph-data.tar.gz</a></code>.
+The file is 29 MB and has an MD5 checksum of <code>122b471c1aad2eb7afd09be35bc16f7e</code>.</p>
+
+<p>Uncompress the data into <code>graph-data/</code>, and inside the directory you will see <code>ny</code> and <code>ne</code>.
+These graphs correspond to the road networks of New York City and Northeast USA from <a href="http://www.diag.uniroma1.it/challenge9/download.shtml">here</a>, respectively.</p>
+
+<ul>
+
+  <li>The New York City (<code>ny</code>) graph contains 264,346 nodes and 733,846 edges.</li>
+  <li>The Northeast USA (<code>ne</code>) graph contains 1,524,453 nodes and 3,897,636 edges.</li>
+
+</ul>
+
+<p>The <code>edges.csv</code> file contains (src, dst, weight).
+For the <code>ny</code> graph:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+% head graph-data/ny/edges.csv
+src,dst,weight
+1,2,803
+2,1,803
+3,4,158
+4,3,158
+5,6,774
+6,5,774
+7,8,1531
+8,7,1531
+9,10,1673
+</pre>
+</div>
+
+<p>The above says you can get from node 1 to node 2 with a weight (i.e., cost) of 803, and so on.
+This should be pretty straightforward to understand.</p>
+
+<h4 style="padding-top: 10px">SSSP with PySpark</h4>
+
+<p>Your first task is to implement Single-Source Shortest Path (SSSP) with weighted paths using RDDs.
+We provide a stub <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/run_sssp_rdd.py"><code>run_sssp_rdd.py</code></a> for you to get started.
+To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
+Please do not change anything other than the parts specified in the stub code.</p>
+
+<p>Here is how we will run <code>run_sssp_rdd.py</code>:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+mkdir -p reachable/ny-src-6-iter000
+echo "6,0" > reachable/ny-src-6-iter000/source.csv
+
+spark-submit run_sssp_rdd.py --edges graph-data/ny/edges.csv --source reachable/ny-src-6-iter000 --iterations 20
+</pre>
+</div>
+
+<p>We start by initializing <code>reachable/ny-src-6-iter000</code> with a single entry:
+This says that node 6 is the source node, with a distance of 0.
+When you run the Spark job, you should see something like this (all the way to iteration 20):</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+Iteration 1: reading from reachable/ny-src-6-iter000, writing to reachable/ny-src-6-iter001
+Iteration 2: reading from reachable/ny-src-6-iter001, writing to reachable/ny-src-6-iter002
+...
+</pre>
+</div>
+
+<p>We start with just the source node 6 in <code>iter000</code>.
+For each iteration, we expand the frontier by one hop, and keep track of all the reachable nodes as (source, distance) pairs.
+This is accomplished by the function <code>expand_frontier</code>, which you have to implement.
+In the Python stub, we provide code for loading <code>edges_rdd</code>.
+</p>
+
+<p>Once you have written the implementation, run it on the <code>ne</code> graph with source node 6, as follows:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+mkdir -p reachable/ne-src-6-iter000
+echo "6,0" > reachable/ne-src-6-iter000/source.csv
+
+spark-submit run_sssp_rdd.py --edges graph-data/ne/edges.csv --source reachable/ne-src-6 --iterations 20
+</pre>
+</div>
+
+<p>You can then collect the reachable nodes at iteration 20, as follows:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+cat reachable/ny-src-6-iter020/* | sort -t ',' -k 2,2n -k 1,1 > spark.ny-src-6.iter020.out
+cat reachable/ne-src-6-iter020/* | sort -t ',' -k 2,2n -k 1,1 > spark.ne-src-6.iter020.out
+</pre>
+</div>
+
+<p>Now start from source node 1024 on the two graphs, as follows:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+mkdir -p reachable/ny-src-1024-iter000
+echo "1024,0" > reachable/ny-src-1024-iter000/source.csv
+
+spark-submit run_sssp_rdd.py --edges graph-data/ny/edges.csv --source reachable/ny-src-1024 --iterations 20
+
+cat reachable/ny-src-1024-iter020/* | sort -t ',' -k 2,2n -k 1,1 > spark.ny-src-1024.iter020.out
+
+mkdir -p reachable/ne-src-1024-iter000
+echo "1024,0" > reachable/ne-src-1024-iter000/source.csv
+
+spark-submit run_sssp_rdd.py --edges graph-data/ne/edges.csv --source reachable/ne-src-1024 --iterations 20
+
+cat reachable/ne-src-1024-iter020/* | sort -t ',' -k 2,2n -k 1,1 > spark.ne-src-1024.iter020.out
+</pre>
+</div>
+
+<p>To recap, by this point you should have:</p>
+
+<ul>
+  <li><code>spark.ny-src-6.iter020.out</code>: <code>ny</code> graph, source node 6, reachable in 20 hops or fewer.</li>
+  <li><code>spark.ne-src-6.iter020.out</code>: <code>ne</code> graph, source node 6, reachable in 20 hops or fewer.</li>
+  <li><code>spark.ny-src-1024.iter020.out</code>: <code>ny</code> graph, source node 1024, reachable in 20 hops or fewer.</li>
+  <li><code>spark.ne-src-1024.iter020.out</code>: <code>ne</code> graph, source node 1024, reachable in 20 hops or fewer.</li>
+</ul>
+
+<h4 style="padding-top: 10px">SSSP with DuckDB</h4>
+
+<p>Next, implement Single-Source Shortest Path (SSSP) with weighted paths using DuckDB.
+We provide a stub <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/run_sssp_duckdb.py"><code>run_sssp_duckdb.py</code></a> for you to get started.
+To guide you through the implementation and to make sure you remain on the right track, you <i>must</i> use this stub code.
+Please do not change anything other than the parts specified in the stub code.</p>
+
+<p>The DuckDB implementation has the same general structure, expect with tables holding the reachable nodes and distances.
+You should be able to issue the following command to run with source node 6 on the <code>ny</code> graph:</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+python run_sssp_duckdb.py --edges graph-data/ny/edges.csv --source 6 --output duckdb.ny-src-6.iter020.out --iterations 20
+</pre>
+</div>
+
+<p>You should see something like this (all the way to iteration 20):</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+Iteration 1: reading from reachable000, writing to reachable001
+Iteration 2: reading from reachable001, writing to reachable002
+...
+Iteration 19: reading from reachable018, writing to reachable019
+Iteration 20: reading from reachable019, writing to reachable020
+-> wrote output to duckdb.ny-src-6.iter020.out
+</pre>
+</div>
+
+<p>Most of the work is done by the <code>expand_frontier</code> function, which parallels the identically named function in the RDD implementation.</p>
+
+<p>Run the following, so you have DuckDB counterparts to the runs with the RDD implementation above.</p>
+
+<div style="padding-top: 10px; padding-bottom: 10px">
+<pre>
+python run_sssp_duckdb.py --edges graph-data/ne/edges.csv --source 6 --output duckdb.ne-src-6.iter020.out --iterations 20
+
+python run_sssp_duckdb.py --edges graph-data/ny/edges.csv --source 1024 --output duckdb.ny-src-1024.iter020.out --iterations 20
+python run_sssp_duckdb.py --edges graph-data/ne/edges.csv --source 1024 --output duckdb.ne-src-1024.iter020.out --iterations 20
+</pre>
+</div>
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
 
