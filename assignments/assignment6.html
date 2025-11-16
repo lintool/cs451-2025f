@@ -124,6 +124,10 @@ src,dst,weight
 <p>The above says you can get from node 1 to node 2 with a weight (i.e., cost) of 803, and so on.
 This should be pretty straightforward to understand.</p>
 
+<h4 style="padding-top: 10px">Data Science with PySpark</h4>
+
+<p>Let us first with some basic analysis of the graphs.</p>
+
 <h4 style="padding-top: 10px">SSSP with PySpark</h4>
 
 <p>Your first task is to implement Single-Source Shortest Path (SSSP) with weighted paths using RDDs.
@@ -138,7 +142,7 @@ Please do not change anything other than the parts specified in the stub code.</
 mkdir -p reachable/ny-src-6-iter000
 echo "6,0" > reachable/ny-src-6-iter000/source.csv
 
-spark-submit run_sssp_rdd.py --edges graph-data/ny/edges.csv --source reachable/ny-src-6-iter000 --iterations 20
+spark-submit run_sssp_rdd.py --edges graph-data/ny/edges.csv --source reachable/ny-src-6 --iterations 20
 </pre>
 </div>
 
@@ -250,6 +254,26 @@ python run_sssp_duckdb.py --edges graph-data/ny/edges.csv --source 1024 --output
 python run_sssp_duckdb.py --edges graph-data/ne/edges.csv --source 1024 --output duckdb.ne-src-1024.iter020.out --iterations 20
 </pre>
 </div>
+
+<h4 style="padding-top: 10px">Assignment Submission</h4>
+
+<p>Procedure is the same as previous assignments.
+Use <a href="#">this link</a> (not active yet) to create an assignment repo for submission.</p>
+
+<p>Make sure the following (from above) are checked into your repo:</p>
+
+<ul>
+  <li><code>spark.ny-src-6.iter020.out</code></li>
+  <li><code>spark.ne-src-6.iter020.out</code></li>
+  <li><code>spark.ny-src-1024.iter020.out</code></li>
+  <li><code>spark.ne-src-1024.iter020.out</code></li>
+
+  <li><code>duckdb.ny-src-6.iter020.out</code></li>
+  <li><code>duckdb.ne-src-6.iter020.out</code></li>
+  <li><code>duckdb.ny-src-1024.iter020.out</code></li>
+  <li><code>duckdb.ne-src-1024.iter020.out</code></li>
+</ul>
+
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
 
