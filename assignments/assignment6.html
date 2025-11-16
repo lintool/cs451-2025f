@@ -79,11 +79,6 @@
 
 <h3>Assignment 6: Single-Source Shortest Path (SSSP) <small>due 10am December 2</small></h3>
 
-<p>‼️ This assignment isn't "ready" until the release date specified in the <a href="../syllabus.html">course syllabus</a>.
-Anything (questions, grading scheme, etc.) might arbitrarily change before the release date.
-<i>Start this assignment before the release date at your own risk.</i>
-After the release date, the assignment can be considered "final" and will only be updated with clarifications.</p> <!-- ' -->
-
 <p>In this assignment you will implement single-source short path (SSSP) with weighted paths in PySpark (with RDDs) and using DuckDB.
 This will give you a sense of how graph algorithms "look" in different approaches.</p>
 
@@ -126,9 +121,13 @@ This should be pretty straightforward to understand.</p>
 
 <h4 style="padding-top: 10px">Data Science with PySpark</h4>
 
-<p>Let us first with some basic analysis of the graphs.</p>
+<p>Let us begin first with some basic analysis of the graphs.
+A Jupyter notebook that contains some basic questions is <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/assignment6.ipynb">here</a>.
+Start by answering those question.</p>
 
 <h4 style="padding-top: 10px">SSSP with PySpark</h4>
+
+<p>Now, on to implementations.</p>
 
 <p>Your first task is to implement Single-Source Shortest Path (SSSP) with weighted paths using RDDs.
 We provide a stub <a href="https://github.com/lintool/cs451-2025f/blob/main/assignments/run_sssp_rdd.py"><code>run_sssp_rdd.py</code></a> for you to get started.
@@ -255,14 +254,22 @@ python run_sssp_duckdb.py --edges graph-data/ne/edges.csv --source 1024 --output
 </pre>
 </div>
 
+<p>Now you will be able to compare the output of the PySpark implementation with the DuckDB implementation.</p>
+
 <h4 style="padding-top: 10px">Assignment Submission</h4>
 
 <p>Procedure is the same as previous assignments.
 Use <a href="#">this link</a> (not active yet) to create an assignment repo for submission.</p>
 
-<p>Make sure the following (from above) are checked into your repo:</p>
+<p>In the assignment repo, for the "Data Science with PySpark" part, enter your answers in <code>assignment6.ipynb</code>.
+Make sure the notebook is committed to the repo (with the answers filled out).</p>
+
+<p>In addition, make sure the following (from above) are committed into your repo:</p>
 
 <ul>
+  <li><code>run_sssp_rdd.py</code>: your SSSP with PySpark implementation</li>
+  <li><code>run_sssp_duckdb.py</code>: SSSP with DuckDB implementation</li>
+
   <li><code>spark.ny-src-6.iter020.out</code></li>
   <li><code>spark.ne-src-6.iter020.out</code></li>
   <li><code>spark.ny-src-1024.iter020.out</code></li>
@@ -274,6 +281,28 @@ Use <a href="#">this link</a> (not active yet) to create an assignment repo for 
   <li><code>duckdb.ne-src-1024.iter020.out</code></li>
 </ul>
 
+<p>Submit the assignment by committing all requested files and pushing your repo (with the answers filled out in the notebook) back to origin.</p>
+
+<h4 style="padding-top: 10px">Grading Scheme</h4>
+
+<ul>
+
+  <li>Answers to questions in the notebook: 12 points</li>
+  <li>Your implementation of <code>run_sssp_rdd.py</code>: 15 points</li>
+  <li>Your implementation of <code>run_sssp_duckdb.py</code>: 15 points</li>
+  <li>The <code>spark.*</code> files above: 12 points</li>
+  <li>The <code>duckdb.*</code> files above: 12 points</li>
+  <li>Explanation of how you used generative AI for this assignment: 3 points (this goes in <code>README.md</code>)</li>
+  <li>Following instructions: 6 points</li>
+
+</ul>
+
+<p>What does "following instructions" mean? These are "free points" if you follow the instructions provided in this assignment.
+These points are to handle the scenario where all your answers are correct, but you <i>did not</i> follow the instructions and that caused us to go out of our way to fix your submission so that it conforms to the instructions.
+(For example, you removed the ids that we used for tracking, which would make it much more difficult to grade.)
+In these and other related cases, we will dock points from this category.</p>
+
+<p><b>Total:</b> 75 points</p>
 
 <p style="padding-top: 20px"><a href="#">Back to top</a></p>
 
