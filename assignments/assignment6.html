@@ -241,7 +241,9 @@ Iteration 20: reading from reachable019, writing to reachable020
 </pre>
 </div>
 
-<p>Most of the work is done by the <code>expand_frontier</code> function, which parallels the identically named function in the RDD implementation.</p>
+<p>Most of the work is done by the <code>expand_frontier</code> function, which parallels the identically named function in the RDD implementation.
+Implement this function.
+Note that expansion of the frontier at each hop must be performed with a single SQL query.</p>
 
 <p>Run the following, so you have DuckDB counterparts to the runs with the RDD implementation above.</p>
 
